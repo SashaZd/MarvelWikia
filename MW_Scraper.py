@@ -1,30 +1,62 @@
 from lxml import html
+
 import requests
 import json
 
+BASE_URL_FOR_WIKIA = 'http://marvel.wikia.com'
 
-# The Request
 
-page = requests.get('http://marvel.wikia.com/wiki/Thor_(Thor_Odinson)')
-tree = html.fromstring(page.text)
+def getNextPageOfCharacterLinks(url):
+	nextPage = "";
+	page = requests.get('http://marvel.wikia.com/wiki/Category:Characters?display=exhibition&sort=alphabetical')
+	tree = html.fromstring(page.text)
+	infoTable = tree.xpath("//div[@id='mw-pages']/a")
 
-infoTable = tree.xpath("//table[@class='infobox-table']/tr")
+	for eachLink in infoTable:
+		if(eachLink.text_content() == "next 200"):
+			nextPage = infoTable[0].values()[0];
+			break	
 
-charDict = {};
+	return
 
-print len(infoTable)
+def getCharacterNamesFromURL(url):
+	charList = []
+	page = requests.get('http://marvel.wikia.com/wiki/Category:Characters?sort=alphabetical')
+	tree = html.fromstring(page.text)
+	infoTable = tree.xpath("//div[@class='mw-content-ltr']/table/tr")
 
-for i in range(0,29):
-	value = tree.xpath("//table[@class='infobox-table']/tr[{i}]/td".format(i=i))
-	# print "---------------"
-	valueList = []
-	for j in range(1,len(value)):
-		valueList.append(value[j].text_content().encode('utf-8').strip())
+	# text returned as a giant string, splitlines gives us each character indpendantly for the page.
+	charList = infoTable[1].text_content().strip().splitlines()
+	return charList
 
-	try: 
-		charDict[value[0].text_content().encode('utf-8').strip()] = valueList
-	except: 
-		pass
 
-print charDict.keys()
-	
+# Method to get a Dictionary from the table
+def getTableDataGivenUrl(url):
+	page = requests.get(url)
+	tree = html.fromstring(page.text)
+
+	infoTable = tree.xpath("//table[@class='infobox-table']/tr")
+
+	charDict = {};
+
+	print len(infoTable)
+
+	for i in range(0,29):
+		value = tree.xpath("//table[@class='infobox-table']/tr[{i}]/td".format(i=i))
+		# print "---------------"
+		valueList = []
+		for j in range(1,len(value)):
+			valueList.append(value[j].text_content().encode('utf-8').strip())
+
+		try: 
+			charDict[value[0].text_content().encode('utf-8').strip()] = valueList
+		except: 
+			pass
+
+	print charDict.keys()
+	return charDict
+
+
+
+
+
