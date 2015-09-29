@@ -7,6 +7,8 @@ BASE_URL_FOR_WIKIA = 'http://marvel.wikia.com'
 
 
 def getNextPageOfCharacterLinks(url):
+	"get the link of the next page of characters to go to"
+
 	nextPage = "";
 	page = requests.get('http://marvel.wikia.com/wiki/Category:Characters?display=exhibition&sort=alphabetical')
 	tree = html.fromstring(page.text)
@@ -20,6 +22,8 @@ def getNextPageOfCharacterLinks(url):
 	return
 
 def getCharacterNamesFromURL(url):
+	"build a list of all the characters with their Wiki names to encode into URLs"
+
 	charList = []
 	page = requests.get('http://marvel.wikia.com/wiki/Category:Characters?sort=alphabetical')
 	tree = html.fromstring(page.text)
@@ -30,8 +34,9 @@ def getCharacterNamesFromURL(url):
 	return charList
 
 
-# Method to get a Dictionary from the table
 def getTableDataGivenUrl(url):
+	"Create dictionary of character data attributes from the Wiki Character table"
+
 	page = requests.get(url)
 	tree = html.fromstring(page.text)
 
