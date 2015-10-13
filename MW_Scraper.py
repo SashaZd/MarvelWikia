@@ -57,32 +57,33 @@ def getNextPageOfCharacterLinks(url):
 
 
 '''
-	In Progress: Methods to get character data from character
-'''
-
-
-
-'''
 	sample URL to be supplied to this method: http://marvel.wikia.com/wiki/Category:Characters?display=exhibition&sort=alphabetical&pagefrom=Ahadi+%28Earth-9590%29#mw-pages
 '''
 
-def getIndividualCharacterPagesFromURL(url):
-	"build a list of all the characters with their Wiki names to encode into URLs"
+def getIndividualCharacterPagesFromURL():
+	"build a URL list of all the characters with their Wiki Pages to encode into URLs"
 
-	charList = []
-	page = requests.get()
-	tree = html.fromstring(page.text)
-	infoTable = tree.xpath("//div[@class='mw-content-ltr']/table/tr/td/ul/li/a")
+	fileForCharacterSets = open('CharacterSets.txt', 'r')
+	fileForCharacterUrls = open('CharacterUrls.txt', 'w')
 
-	flag = False;
-	for each in infoTable:
-		if flag:
-			charList.append(each.values())
-		elif each.values()[0] == "/wiki/Category:Secret_Wars_participants":
-			flag = True;
+	for characterSets in fileForCharacterSets:
+		charSetUrl = characterSets.strip()
+		page = requests.get(charSetUrl)
+		tree = html.fromstring(page.text)
+		infoTable = tree.xpath("//div[@class='mw-content-ltr']/table/tr/td/ul/li/a")
 
-	return charList
+		flag = False;
+		for each in infoTable:
+			if flag:
+				charUrl = BASE_URL_FOR_WIKIA+each.values()[0]+"\n"
+				fileForCharacterUrls.write(charUrl)
+			elif each.values()[0] == "/wiki/Category:Secret_Wars_participants":
+				flag = True;
 
+
+'''
+	In Progress: Methods to get character data from character
+'''
 
 def getTableDataGivenUrl(url):
 	"Create dictionary of character data attributes from the Wiki Character table"
@@ -93,27 +94,60 @@ def getTableDataGivenUrl(url):
 	infoTable = tree.xpath("//table[@class='infobox-table']/tr")
 
 	charDict = {};
+	flagName = False;
+	# print len(infoTable)
 
-	print len(infoTable)
-
-	for i in range(0,29):
+	for i in range(0,len(infoTable)):
 		value = tree.xpath("//table[@class='infobox-table']/tr[{i}]/td".format(i=i))
 		# print "---------------"
 		valueList = []
-		for j in range(1,len(value)):
-			valueList.append(value[j].text_content().encode('utf-8').strip())
-
 		try: 
-			charDict[value[0].text_content().encode('utf-8').strip()] = valueList
+			keyToAdd = value[0].text_content().encode('utf-8').strip()
+
+			# Check for headers in the table
+			for j in range(1,len(value)):
+				valueToAdd = value[j].text_content().encode('utf-8').strip()
+				valueList.append(valueToAdd)
+
+			# Is this his title?
+			if len(valueList) == 0:
+				if flagName==False:
+					flagName = keyToAdd
+			elif "First Appearance" not in keyToAdd:
+				charDict[keyToAdd] = valueList
+
 		except: 
 			pass
 
-	print charDict.keys()
-	return charDict
+	return flagName, charDict;
+
+allChars = {};
+
+fileForCharacterData = open('CharacterData.json', 'w')
+fileForCharacterUrls = open('CharacterUrls.txt', 'r')
+fileForCharacterData.write("{ \n");
+flagDoneTill = False;
+
+for eachCharLink in fileForCharacterUrls:
+	charLink = eachCharLink.strip()
+
+	# Only getting Earth-616 characters first. Will append the dictionaries later. 
+	if "Earth-616" in charLink:
+		# if flagDoneTill==False: 
+		# 	if "http://marvel.wikia.com/wiki/Jane_Melville_(Earth-616)" in charLink:
+		# 		flagDoneTill = True;
+
+		# else:
+		char, charDict = getTableDataGivenUrl(charLink)
+		allChars[char] = charDict
+		toWrite = "'" + str(char)+ "' : " + str(allChars[char]) + ",\n"
+		fileForCharacterData.write(toWrite)
+		print char
+
+allData = open('allChars.json', 'w')
+allData.write(json.dumps(allChars))
 
 
 
-# print getIndividualCharacterPagesFromURL()
-
-
-
+# print getTableDataGivenUrl("http://marvel.wikia.com/wiki/Abraham_Erskine_(Earth-616)")
+# print getTableDataGivenUrl("http://marvel.wikia.com/wiki/Hulk_(Robert_Bruce_Banner)")
