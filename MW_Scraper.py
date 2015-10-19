@@ -121,31 +121,36 @@ def getTableDataGivenUrl(url):
 
 	return flagName, charDict;
 
-allChars = {};
+def getStartCharDict():
+	allChars = {};
 
-fileForCharacterData = open('CharacterData.json', 'w')
-fileForCharacterUrls = open('CharacterUrls.txt', 'r')
-fileForCharacterData.write("{ \n");
-flagDoneTill = False;
+	fileForCharacterData = open('CharacterData.json', 'w')
+	fileForCharacterUrls = open('CharacterUrls.txt', 'r')
+	fileForCharacterData.write("{ \n");
+	flagDoneTill = False;
 
-for eachCharLink in fileForCharacterUrls:
-	charLink = eachCharLink.strip()
+	for eachCharLink in fileForCharacterUrls:
+		charLink = eachCharLink.strip()
 
-	# Only getting Earth-616 characters first. Will append the dictionaries later. 
-	if "Earth-616" in charLink:
-		# if flagDoneTill==False: 
-		# 	if "http://marvel.wikia.com/wiki/Jane_Melville_(Earth-616)" in charLink:
-		# 		flagDoneTill = True;
+		# Only getting Earth-616 characters first. Will append the dictionaries later. 
+		if "Earth-616" in charLink:
+			# if flagDoneTill==False: 
+			# 	if "http://marvel.wikia.com/wiki/Jane_Melville_(Earth-616)" in charLink:
+			# 		flagDoneTill = True;
 
-		# else:
-		char, charDict = getTableDataGivenUrl(charLink)
-		allChars[char] = charDict
-		toWrite = "'" + str(char)+ "' : " + str(allChars[char]) + ",\n"
-		fileForCharacterData.write(toWrite)
-		print char
+			# else:
+			char, charDict = getTableDataGivenUrl(charLink)
+			allChars[char] = charDict
+			toWrite = "'" + str(char)+ "' : " + str(allChars[char]) + ",\n"
+			fileForCharacterData.write(toWrite)
+			print char
 
-allData = open('allChars.json', 'w')
-allData.write(json.dumps(allChars))
+	allData = open('allChars.json', 'w')
+	allData.write(json.dumps(allChars))
+
+
+	
+
 
 
 
