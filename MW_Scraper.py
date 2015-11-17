@@ -134,11 +134,21 @@ def getStartCharDict():
 
 		# Only getting Earth-616 characters first. Will append the dictionaries later. 
 		if "Earth-616" in charLink:
-			# if flagDoneTill==False: 
-			# 	if "http://marvel.wikia.com/wiki/Jane_Melville_(Earth-616)" in charLink:
-			# 		flagDoneTill = True;
+			char, charDict = getTableDataGivenUrl(charLink)
+			allChars[char] = charDict
+			toWrite = "'" + str(char)+ "' : " + str(allChars[char]) + ",\n"
+			fileForCharacterData.write(toWrite)
+			print char
+		
+		# For major characters who are exist everywhere (not only in Earth-616)
+		elif "Earth" not in charLink:
+			char, charDict = getTableDataGivenUrl(charLink)
+			allChars[char] = charDict
+			toWrite = "'" + str(char)+ "' : " + str(allChars[char]) + ",\n"
+			fileForCharacterData.write(toWrite)
+			print char
 
-			# else:
+		else:
 			char, charDict = getTableDataGivenUrl(charLink)
 			allChars[char] = charDict
 			toWrite = "'" + str(char)+ "' : " + str(allChars[char]) + ",\n"
@@ -149,10 +159,7 @@ def getStartCharDict():
 	allData.write(json.dumps(allChars))
 
 
-	
-
-
-
+# getStartCharDict()
 
 # print getTableDataGivenUrl("http://marvel.wikia.com/wiki/Abraham_Erskine_(Earth-616)")
 # print getTableDataGivenUrl("http://marvel.wikia.com/wiki/Hulk_(Robert_Bruce_Banner)")
